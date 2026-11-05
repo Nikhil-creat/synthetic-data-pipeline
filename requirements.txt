@@ -1,4 +1,4 @@
-torch==2.4.1
+torch==2.15.0
 torchvision==0.19.1
 scikit-learn==1.5.2
 imbalanced-learn==0.12.4
