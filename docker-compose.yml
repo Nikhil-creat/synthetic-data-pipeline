@@ -23,6 +23,8 @@ services:
       MAX_UPLOAD_MB: "200"
       API_KEY: "${API_KEY:-}"
       CORS_ORIGINS: "${CORS_ORIGINS:-*}"
+      GROQ_API_KEY: "${GROQ_API_KEY:-}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
     ports:
       - "8000:8000"
     depends_on:

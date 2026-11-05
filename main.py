@@ -20,8 +20,10 @@ import os
 import secrets
 import shutil
 import tempfile
+import time
 import uuid
 import zipfile
+from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Dict, List, Literal, Optional
@@ -33,6 +35,7 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
+from assistant import LLMRouter, LLMUnavailable
 from pipeline import (
     CNNFeatureExtractor,
     DataValidationError,
@@ -71,6 +74,7 @@ async def lifespan(app: FastAPI):
     app.state.rag = await run_in_threadpool(RAGStrategyEngine, cfg)  # connect + seed Qdrant once
     app.state.extractor = None                                         # built lazily on first image upload
     app.state.sessions = {}
+    app.state.llm = LLMRouter()  # reads GROQ_API_KEY / GEMINI_API_KEY; detects provider and model
     logger.info("Ready. RAG backend: %s", app.state.rag.backend)
     yield
 
@@ -83,7 +87,7 @@ async def require_key(request: Request) -> None:
         raise HTTPException(status_code=401, detail="Missing or invalid X-API-Key header.")
 
 
-app = FastAPI(title="Synthetic Data Pipeline", version="1.1.0", lifespan=lifespan, dependencies=[Depends(require_key)])
+app = FastAPI(title="Synthetic Data Pipeline", version="1.2.0", lifespan=lifespan, dependencies=[Depends(require_key)])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",")],
@@ -286,3 +290,125 @@ async def demo_data(n: int = 4000, minority_fraction: float = 0.01, seed: int = 
     df = await run_in_threadpool(make_demo_dataset, n, minority_fraction, 8, seed)
     return Response(df.to_csv(index=False), media_type="text/csv",
                     headers={"Content-Disposition": "attachment; filename=demo_imbalanced.csv"})
+
+
+# ------------------------- observability ---------------------------------- #
+_REQ_COUNT: Dict[tuple, int] = defaultdict(int)
+_REQ_SECS: Dict[tuple, float] = defaultdict(float)
+
+
+@app.middleware("http")
+async def observe(request: Request, call_next):
+    """Adds X-Request-ID / X-Process-Time headers and collects Prometheus counters."""
+    start = time.perf_counter()
+    response = await call_next(request)
+    elapsed = time.perf_counter() - start
+    route = request.scope.get("route")
+    key = (request.method, getattr(route, "path", "unmatched"), response.status_code)
+    _REQ_COUNT[key] += 1
+    _REQ_SECS[key] += elapsed
+    response.headers["X-Request-ID"] = uuid.uuid4().hex[:12]
+    response.headers["X-Process-Time"] = f"{elapsed:.4f}"
+    return response
+
+
+@app.get("/metrics")
+async def metrics():
+    lines = ["# TYPE sdp_http_requests_total counter", "# TYPE sdp_http_request_seconds_sum counter"]
+    for (method, path, status), n in sorted(_REQ_COUNT.items()):
+        lab = f'method="{method}",path="{path}",status="{status}"'
+        lines.append(f"sdp_http_requests_total{{{lab}}} {n}")
+        lines.append(f"sdp_http_request_seconds_sum{{{lab}}} {_REQ_SECS[(method, path, status)]:.6f}")
+    lines.append(f"sdp_sessions {len(app.state.sessions)}")
+    return Response("\n".join(lines) + "\n", media_type="text/plain; version=0.0.4")
+
+
+# ------------------------- AI assistant ----------------------------------- #
+RATE_LIMIT, RATE_WINDOW = 20, 60.0
+_HITS: Dict[str, deque] = defaultdict(deque)
+
+PROJECT_FACTS = (
+    "You are the Equilibra assistant. Equilibra is an agentic synthetic-data pipeline for severely imbalanced "
+    "datasets (tabular and image). Rules it follows: stratified split first, scaler fitted on train only, "
+    "SMOTE/ADASYN/Borderline-SMOTE/SMOTE-Tomek applied to training rows only, frozen ResNet18 features for images, "
+    "Qdrant RAG for k_neighbors and target ratios, self-healing retries, PR-AUC/precision/recall/F1 (never accuracy), "
+    "FastAPI + Docker. It was built by Nikhil Chary Sriramoju, a final-year B.Tech CSE student. "
+    "Answer in under 150 words. Use only the facts and context given; if unsure, say so. Never invent metrics "
+    "and never ask for API keys."
+)
+
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(max_length=4000)
+
+
+class AssistantRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=4000)
+    history: List[ChatMessage] = Field(default_factory=list, max_length=12)
+    dataset_id: Optional[str] = None
+
+
+class ExplainRequest(BaseModel):
+    dataset_id: str
+
+
+def _rate_limit(request: Request) -> None:
+    ip = request.client.host if request.client else "unknown"
+    now, q = time.monotonic(), _HITS[ip]
+    while q and now - q[0] > RATE_WINDOW:
+        q.popleft()
+    if len(q) >= RATE_LIMIT:
+        raise HTTPException(status_code=429, detail="Assistant rate limit: 20 requests per minute.")
+    q.append(now)
+
+
+def _offline_reply(docs: List[dict]) -> str:
+    if not docs:
+        return "No LLM key is configured and the knowledge base has nothing on that yet."
+    lines = [f"- {d['source']}: {d['text']}" for d in docs]
+    return "No LLM key is configured, so here is the closest guidance from the knowledge base:\n" + "\n".join(lines)
+
+
+async def _answer(system: str, messages: List[dict], docs: List[dict], fallback: str):
+    try:
+        out = await app.state.llm.chat(messages, system)
+    except LLMUnavailable as exc:
+        return {"reply": fallback, "provider": "offline-rag", "model": None,
+                "sources": [d["source"] for d in docs], "note": str(exc)}
+    return {"reply": out["text"], "provider": out["provider"], "model": out["model"],
+            "sources": [d["source"] for d in docs], "fallbacks_tried": out["tried"]}
+
+
+@app.get("/assistant/status")
+async def assistant_status():
+    """Which providers are configured and which model was auto-selected (no keys are returned)."""
+    return await app.state.llm.status()
+
+
+@app.post("/assistant/chat")
+async def assistant_chat(req: AssistantRequest, request: Request):
+    """Chat grounded in the Qdrant knowledge base and, optionally, one dataset's results."""
+    _rate_limit(request)
+    docs = await run_in_threadpool(app.state.rag.search, req.message, 3)
+    system = PROJECT_FACTS
+    if docs:
+        system += "\n\nKnowledge base excerpts:\n" + "\n".join(f"- {d['source']}: {d['text']} {d['rec']}" for d in docs)
+    if req.dataset_id:
+        ctx = _get_session(req.dataset_id).pipeline.context()
+        system += f"\n\nCurrent dataset context (JSON): {ctx}"
+    messages = [m.model_dump() for m in req.history] + [{"role": "user", "content": req.message}]
+    return await _answer(system, messages, docs, _offline_reply(docs))
+
+
+@app.post("/assistant/explain")
+async def assistant_explain(req: ExplainRequest, request: Request):
+    """Plain-English explanation of an evaluated dataset, with next steps."""
+    _rate_limit(request)
+    session = _get_session(req.dataset_id)
+    async with session.lock:
+        rep = await run_in_threadpool(session.pipeline.report)
+    prompt = ("Explain these results to a non-expert in plain English. Say whether PR-AUC beats the random "
+              "baseline, note any caveat (such as an optimistic threshold), and give 3 concrete next steps.\n\n"
+              + rep["markdown"])
+    return await _answer(PROJECT_FACTS, [{"role": "user", "content": prompt}], [], rep["markdown"])
