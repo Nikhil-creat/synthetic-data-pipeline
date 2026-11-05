@@ -5,7 +5,7 @@ imbalanced-learn==0.12.4
 numpy==1.26.4
 pandas==2.2.3
 pillow==10.4.0
-fastapi==0.115.0
+fastapi==0.162.0
 uvicorn[standard]==0.30.6
 python-multipart==0.0.12
 qdrant-client==1.12.1
