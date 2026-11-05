@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equilibra · Honest models from imbalanced data</title>
+<meta name="description" content="A synthetic data pipeline for severely imbalanced datasets: agentic resampling, RAG-guided hyperparameters, and leakage-free evaluation.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2724%22 fill=%22%2346DCEC%22/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,200..800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#09131F;--cyan:#46DCEC;--ink:#0A0F15;--cream:#F6EBD6;--mist:#9FB3C4;--teal:#0B4A5A;--s:calc(100vw / 745)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Inter,system-ui,sans-serif;background:#fff;color:#0b1b26;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+
+/* ---------- hero ---------- */
+.hero{position:relative;height:max(100svh,700px);overflow:hidden;color:#fff;background:linear-gradient(#09131F 0%,#0B4A5A 52%,#46DCEC 82%,#fff 100%)}
+.bg,.bg-top,.bg-bot{position:absolute;left:0;right:0;background-image:url(https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/35281788-af1d-4637-b2bf-24ebe55f11bb.png);background-repeat:no-repeat}
+.bg{inset:0;background-size:100% 100%}
+.bg-top{top:0;height:calc(var(--s) * 70);background-size:100% auto;background-position:top;-webkit-mask-image:linear-gradient(#000 calc(100% - 40px),transparent);mask-image:linear-gradient(#000 calc(100% - 40px),transparent)}
+.bg-bot{bottom:0;height:calc(var(--s) * 90);background-size:100% auto;background-position:bottom;-webkit-mask-image:linear-gradient(transparent,#000 40px);mask-image:linear-gradient(transparent,#000 40px)}
+
+nav{position:absolute;z-index:10;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:26px clamp(20px,4vw,56px)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:19px;letter-spacing:-.01em}
+.logo{width:30px;height:30px;border-radius:9px;background:var(--cyan);display:grid;place-items:center}
+.logo svg{width:16px;height:16px}
+.links{display:flex;gap:34px;font-size:15px;color:#d6e4ee}
+.links a:hover{color:#fff}
+.burger{width:36px;height:36px;display:grid;align-content:center;gap:7px;justify-items:end;background:none;border:0;cursor:pointer}
+.burger i{display:block;height:1.5px;background:#fff;width:24px}.burger i+i{width:16px}
+
+.copy{position:absolute;z-index:6;top:clamp(104px,15vh,150px);left:0;right:0;text-align:center;padding:0 20px}
+h1{font-family:Newsreader,Georgia,serif;font-weight:330;font-size:clamp(40px,5.7vw,82px);line-height:1.04;letter-spacing:-.025em;color:#fff}
+h1 span{display:inline}
+.sub{margin:22px auto 0;max-width:520px;color:var(--mist);font-size:clamp(15px,1.3vw,17px);line-height:1.5}
+.cta{margin-top:30px;display:flex;gap:12px;justify-content:center}
+.btn{height:46px;padding:0 24px;border-radius:999px;display:inline-flex;align-items:center;font-weight:500;font-size:15px;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn.cream{background:var(--cream);color:#1a1a14}
+.btn.glass{background:rgba(9,19,31,.55);color:#fff;border:1px solid rgba(255,255,255,.16);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+
+#eq{position:absolute;z-index:2;left:0;bottom:0;width:100%;height:42%}
+.man{position:absolute;z-index:3;bottom:0;left:56%;transform:translateX(-50%);height:58%;width:auto;pointer-events:none}
+
+.card{position:absolute;z-index:7;border-radius:18px}
+.agent{left:clamp(16px,13vw,200px);bottom:17%;width:262px;padding:16px;background:rgba(206,247,252,.55);border:1px solid rgba(255,255,255,.7);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#0a2a33;box-shadow:0 18px 40px -18px rgba(9,40,55,.5)}
+.agent .row{display:flex;align-items:center;gap:9px;font-weight:600;font-size:15px}
+.agent .logo{width:24px;height:24px;border-radius:7px}.agent .logo svg{width:13px;height:13px}
+.field{margin-top:14px;height:40px;border-radius:11px;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:space-between;padding:0 13px;font-size:13.5px;color:#46636e}
+.deploy{margin-top:10px;width:100%;height:40px;border:0;border-radius:11px;background:#0B3640;color:var(--cyan);font:600 14px Inter,sans-serif;cursor:pointer}
+.chat{right:clamp(16px,6vw,110px);bottom:12%;width:318px;padding:16px;background-color:#f3f5f7;background-image:radial-gradient(#cfd6dc 1px,transparent 1.2px);background-size:9px 9px;color:#0b1b26;box-shadow:0 20px 44px -20px rgba(9,19,31,.55)}
+.tools{display:flex;gap:8px;margin-bottom:12px}
+.tools b{width:26px;height:26px;border-radius:8px;background:#fff;display:grid;place-items:center;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.tools svg{width:14px;height:14px}
+.bubble{background:var(--navy);color:#e8f1f6;padding:12px 14px;border-radius:14px 14px 14px 4px;font-size:13.5px;line-height:1.45}
+.ask{margin-top:12px;display:flex;align-items:center;gap:8px}
+.ask div{flex:1;height:42px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 14px;font-size:13px;color:#7b8a95}
+.ask div svg{width:18px;height:18px}
+.mic{--lvl:0;width:42px;height:42px;border-radius:50%;background:var(--navy);display:grid;place-items:center;box-shadow:0 0 0 calc(var(--lvl) * 9px) rgba(70,220,236,.32),0 0 calc(var(--lvl) * 26px) rgba(70,220,236,calc(var(--lvl) * .75))}
+.mic svg{width:18px;height:18px}
+
+/* entrance */
+@keyframes rise{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes settle{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+@keyframes inL{from{opacity:0;transform:translateX(-36px)}to{opacity:1;transform:none}}
+@keyframes inR{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+nav,.copy{animation:settle 1.2s cubic-bezier(.2,.7,.2,1) both}
+#eq{animation:fade 1.4s ease both .2s}
+.man{animation:rise 1.6s cubic-bezier(.2,.7,.2,1) both}
+.agent{animation:inL 1.4s cubic-bezier(.2,.7,.2,1) both .2s}
+.chat{animation:inR 1.4s cubic-bezier(.2,.7,.2,1) both .2s}
+
+/* ---------- below the fold ---------- */
+.info{background:#fff;padding:clamp(56px,8vw,110px) clamp(20px,6vw,96px)}
+.info h2{font-family:Newsreader,Georgia,serif;font-weight:330;font-size:clamp(32px,4vw,52px);letter-spacing:-.02em;line-height:1.08;max-width:14em}
+.info>p{margin-top:14px;max-width:560px;color:#4b6272;line-height:1.55}
+.grid{margin-top:44px;display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid #d9e4ea}
+.grid article{padding:26px 24px 8px 0;margin-right:24px;border-right:1px solid #e6eef2}
+.grid article:last-child{border-right:0;margin-right:0}
+.grid h3{font-size:16px;font-weight:600}
+.grid p{margin-top:8px;font-size:14.5px;line-height:1.55;color:#4b6272}
+.api{margin-top:56px;background:var(--navy);color:#cfe3ee;border-radius:18px;padding:26px clamp(18px,3vw,36px);overflow-x:auto}
+.api table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+.api td{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.09);vertical-align:top}
+.api tr:last-child td{border:0}
+.api td:first-child{color:var(--cyan);font-family:ui-monospace,Menlo,monospace;white-space:nowrap;padding-right:28px}
+
+
+.bar{position:fixed;z-index:30;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px clamp(16px,4vw,48px);background:rgba(9,19,31,.84);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;transform:translateY(-100%);transition:transform .3s}
+.bar.on{transform:none}.bar .links{gap:24px;font-size:14px}.bar .btn{height:36px;padding:0 16px;font-size:14px}
+.menu{position:fixed;inset:0;z-index:40;background:rgba(9,19,31,.97);display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px;font:330 34px Newsreader,Georgia,serif;color:#fff}
+.menu.open{display:flex}.menu button{position:absolute;top:20px;right:22px;background:none;border:0;color:#fff;font-size:34px;cursor:pointer}
+.info.dark{background:var(--navy);color:#dbe8f0}.info.dark>p{color:var(--mist)}
+.lab{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;margin-top:34px;align-items:start}
+canvas{display:block;width:100%;aspect-ratio:1.4;background:#0d1d2c;border-radius:16px}
+.cap{margin-top:10px;font-size:13.5px;line-height:1.5;color:var(--mist)}
+table.m{width:100%;border-collapse:collapse;font-size:14px}.m th,.m td{padding:9px 8px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1)}
+.m th:first-child,.m td:first-child{text-align:left;color:var(--mist)}.m td.hi{color:var(--cyan);font-weight:600}
+.ctl{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;margin-top:18px;font-size:14px}
+.ctl input,.ctl select{height:40px;border-radius:10px;border:1px solid #2a4254;background:#0d1d2c;color:#fff;padding:0 12px;font:inherit}
+.ctl input[type=range]{padding:0;height:auto;accent-color:var(--cyan)}
+.dark h3{margin-top:48px;font:330 28px Newsreader,Georgia,serif}
+pre#out{margin-top:16px;background:#0d1d2c;border-radius:14px;padding:16px;font:13px/1.5 ui-monospace,Menlo,monospace;color:#cfe3ee;max-height:320px;overflow:auto;white-space:pre-wrap}
+.grid ul{margin-top:10px;list-style:none;font-size:14px;line-height:1.7;color:#35505f}
+.links2{margin-top:30px;display:flex;flex-wrap:wrap;gap:12px}.links2 .btn{border:1px solid #cfdde5;color:#0b1b26}
+footer{background:var(--navy);color:#9FB3C4;padding:48px clamp(20px,6vw,96px) 28px;font-size:14px}
+footer .ft{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:32px}footer h4{color:#fff;font-weight:600;margin-bottom:10px}
+footer a{display:block;color:#cfe3ee;padding:3px 0;text-decoration:none}footer a:hover{color:var(--cyan)}
+footer .brand{color:#fff;margin-bottom:12px;display:flex}footer p{max-width:320px;line-height:1.55}
+footer .legal{margin-top:34px;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* ---------- phone ---------- */
+@media (max-width:760px){
+  .links{display:none}.bar .brand{font-size:17px}
+  .lab,footer .ft{grid-template-columns:1fr}
+  h1{font-size:clamp(38px,11.5vw,50px)}
+  h1 span{display:block}
+  .copy{top:92px}.cta{margin-top:22px}
+  .man{height:46%;left:60%}
+  #eq{height:36%}
+  .agent{left:3.5%;bottom:3.5%;width:47%;padding:12px}
+  .agent .field,.deploy{height:34px;font-size:12px}
+  .chat{right:3.5%;bottom:6%;width:47%;padding:12px}
+  .tools{display:none}
+  .bubble{font-size:11.5px;padding:9px 11px}
+  .ask div{font-size:11px;height:36px}.mic{width:36px;height:36px}
+  .grid{grid-template-columns:1fr}
+  .grid article{border-right:0;margin-right:0;border-bottom:1px solid #e6eef2;padding-bottom:22px}
+}
+@media (prefers-reduced-motion:reduce){nav,.copy,#eq,.man,.agent,.chat{animation:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"><a class="brand" href="#top"><span class="logo"><svg viewBox="0 0 16 16"><rect x="1" y="6" width="3" height="9" rx="1" fill="#09131F"/><rect x="6.5" y="1" width="3" height="14" rx="1" fill="#09131F"/><rect x="12" y="4" width="3" height="11" rx="1" fill="#09131F"/></svg></span>Equilibra</a><div class="links"><a href="#stack">Pipeline</a><a href="#lab">Playground</a><a href="#ops">Production</a><a href="#about">About</a></div><a class="btn cream" href="https://github.com/Nikhil-creat/synthetic-data-pipeline">GitHub</a></div>
+<div class="menu" id="menu"><button aria-label="Close menu">&times;</button><a href="#stack">Pipeline</a><a href="#lab">Playground</a><a href="#ops">Production</a><a href="#about">About</a><a href="https://github.com/Nikhil-creat/synthetic-data-pipeline">GitHub</a></div>
+<header class="hero">
+  <div class="bg"></div><div class="bg-top"></div><div class="bg-bot"></div>
+
+  <nav>
+    <a class="brand" href="#top"><span class="logo"><svg viewBox="0 0 16 16"><rect x="1" y="6" width="3" height="9" rx="1" fill="#09131F"/><rect x="6.5" y="1" width="3" height="14" rx="1" fill="#09131F"/><rect x="12" y="4" width="3" height="11" rx="1" fill="#09131F"/></svg></span>Equilibra</a>
+    <div class="links"><a href="#stack">Pipeline</a><a href="#lab">Playground</a><a href="#ops">Production</a><a href="#about">About</a></div>
+    <button class="burger" aria-label="Open menu"><i></i><i></i></button>
+  </nav>
+
+  <div class="copy" id="top">
+    <h1><span>Train honest models on</span> <span>severely</span> <span>imbalanced data</span></h1>
+    <p class="sub">Equilibra picks the right resampler for your data, then scores every model on a test set it never touched.</p>
+    <div class="cta"><a class="btn cream" href="https://github.com/Nikhil-creat/synthetic-data-pipeline">View on GitHub</a><a class="btn glass" href="#lab">Try it live</a></div>
+  </div>
+
+  <svg id="eq" viewBox="0 0 1440 380" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+  <img class="man" alt="" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/b5703dce-12a2-4177-8b07-8c158121d986.png">
+
+  <aside class="card agent" aria-label="Run pipeline">
+    <div class="row"><span class="logo"><svg viewBox="0 0 16 16"><rect x="1" y="6" width="3" height="9" rx="1" fill="#09131F"/><rect x="6.5" y="1" width="3" height="14" rx="1" fill="#09131F"/><rect x="12" y="4" width="3" height="11" rx="1" fill="#09131F"/></svg></span>Run Pipeline</div>
+    <div class="field"><span>Select strategy</span><span>&#8964;</span></div>
+    <button class="deploy" id="go" type="button">Resample</button>
+  </aside>
+
+  <aside class="card chat" aria-label="Sample agent output">
+    <div class="tools">
+      <b><svg viewBox="0 0 16 16" fill="none" stroke="#33505e" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 4v4l3 2"/></svg></b>
+      <b><svg viewBox="0 0 16 16" fill="none" stroke="#33505e" stroke-width="1.5"><path d="M2 12l4-5 3 3 5-7"/></svg></b>
+      <b><svg viewBox="0 0 16 16" fill="none" stroke="#33505e" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M5 7h6M5 10h4"/></svg></b>
+    </div>
+    <div class="bubble">Minority is 0.8% of rows. Routing to Borderline-SMOTE with k=5. The test set stays untouched.</div>
+    <div class="ask">
+      <div><span>Why not accuracy…</span><svg viewBox="0 0 18 18" fill="none" stroke="#0b1b26" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l12-6-5 12-2-5z"/></svg></div>
+      <span class="mic" id="mic"><svg viewBox="0 0 18 18" fill="none" stroke="#46DCEC" stroke-width="1.6" stroke-linecap="round"><rect x="6.5" y="2" width="5" height="9" rx="2.5"/><path d="M3.5 9a5.5 5.5 0 0011 0M9 14.5V16.5"/></svg></span>
+    </div>
+  </aside>
+</header>
+
+<main>
+<section class="info" id="stack">
+  <h2>One pipeline, with no leakage between train and test</h2>
+  <p>Upload a CSV or a ZIP of images. The agent profiles the data, looks up guidance, resamples the training rows, and reports metrics that hold up.</p>
+  <div class="grid">
+    <article><h3>Split first</h3><p>A stratified split comes before any scaling or resampling. The scaler is fitted on training rows only, and the test set is never resampled.</p></article>
+    <article><h3>Agentic routing</h3><p>The state machine reads imbalance, noise and dimensions, then picks SMOTE, ADASYN, Borderline-SMOTE or SMOTE-Tomek. Failed runs retry with safer settings.</p></article>
+    <article><h3>RAG-guided settings</h3><p>Qdrant returns k_neighbors, target ratios and compliance limits from stored papers and guidelines, with citations in every response.</p></article>
+    <article><h3>Honest metrics</h3><p>Precision, recall, F1 and PR-AUC. Accuracy is never computed. The decision threshold is tuned on validation data by default.</p></article>
+  </div>
+  <div class="api" id="api">
+    <table>
+      <tr><td>POST /ingest</td><td>Upload a CSV or an image ZIP. Returns a dataset_id and the data profile.</td></tr>
+      <tr><td>POST /resample</td><td>Route, retrieve guidance and resample the training partition.</td></tr>
+      <tr><td>POST /train</td><td>Fit a classifier on the resampled rows, with self-healing retries.</td></tr>
+      <tr><td>POST /evaluate</td><td>Score the untouched test set with an optimized threshold.</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="info dark" id="lab">
+  <h2>Try it in your browser</h2>
+  <p>A small 2-D stand-in for the real pipeline, with the same rules: split first, resample the training rows only, score the untouched test rows.</p>
+  <div class="lab">
+    <div><canvas id="cv" width="700" height="500" aria-label="Scatter plot of majority, minority and synthetic points"></canvas><p class="cap" id="route"></p></div>
+    <div>
+      <table class="m" id="tbl"></table>
+      <div class="ctl">
+        <label>Minority share <input id="pct" type="range" min="0.5" max="10" step="0.5" value="1"> <b id="pctv">1%</b></label>
+        <label>Resampler <select id="alg"><option value="auto">Agent picks</option><option value="smote">SMOTE</option><option value="borderline">Borderline-SMOTE</option><option value="none">None</option></select></label>
+        <button class="btn cream" id="run" type="button">Run</button>
+      </div>
+      <p class="cap" id="acc"></p>
+    </div>
+  </div>
+  <h3>Connect your API</h3>
+  <p>Start the backend with <code>docker compose up</code>, then run the full flow against it: demo data, resample, train, evaluate.</p>
+  <div class="ctl">
+    <input id="base" type="text" value="http://localhost:8000" aria-label="API base URL" size="24">
+    <input id="key" type="password" placeholder="X-API-Key (optional)" aria-label="API key">
+    <button class="btn glass" id="hb" type="button">Check health</button>
+    <button class="btn cream" id="fb" type="button">Run full demo</button>
+  </div>
+  <pre id="out">Output appears here.</pre>
+</section>
+
+<section class="info" id="ops">
+  <h2>Built to be deployed, not just demoed</h2>
+  <p>The same service the playground imitates, with the controls a team expects.</p>
+  <div class="grid">
+    <article><h3>Self-healing</h3><p>A failed resampler retries with a smaller k, then plain SMOTE, then random oversampling. Every retry is logged in the response.</p></article>
+    <article><h3>Strategy benchmark</h3><p><code>/compare</code> scores every resampler on validation data and names the best one, so the choice is measured.</p></article>
+    <article><h3>Model card</h3><p><code>/report</code> returns a Markdown summary: strategy, citations, threshold source and the leakage controls applied.</p></article>
+    <article><h3>Hardened by default</h3><p>Optional API key, CORS allow-list, upload and session limits, a non-root multi-stage image, health checks and CI tests.</p></article>
+  </div>
+</section>
+
+<section class="info" id="about">
+  <h2>Built by Nikhil Chary Sriramoju</h2>
+  <p>Final-year B.Tech CSE student building agentic AI, RAG and MLOps projects, pushed from a phone and deployed on GitHub Pages.</p>
+  <div class="grid">
+    <article><h3>Experience</h3><ul><li>Data Analyst Intern offer, Bluestock Fintech (Nov 2026 to Jan 2027, remote)</li><li>Data Analytics internship, Thiranex (2026)</li></ul></article>
+    <article><h3>Job simulations</h3><ul><li>Deloitte: Data Analytics, Technology</li><li>PwC: Technology Consulting, Cyber Security</li><li>Datacom: Security Operations, Automation AI</li><li>British Airways: Data Science</li><li>Clifford Chance, Latham &amp; Watkins</li></ul></article>
+    <article><h3>NASSCOM and Skill India</h3><ul><li>IT Forensic Analyst</li><li>Cloud Infrastructure Analyst</li><li>Endpoint Security Analyst</li><li>Blockchain Architect</li><li>Product Manager, Web &amp; Mobile</li><li>NIELIT Yuva AI for All</li></ul></article>
+    <article><h3>Reliance Foundation and more</h3><ul><li>AI-ML Engineer Foundation</li><li>IoT Security Specialist</li><li>Industry 4.0 Robotics Systems (90 hrs)</li><li>Power BI dashboards, PHN Technology</li></ul></article>
+  </div>
+  <div class="links2"><a class="btn" href="https://github.com/Nikhil-creat">GitHub</a><a class="btn" href="https://in.linkedin.com/in/nikhil-chary-sriramoju-95041b38a">LinkedIn</a><a class="btn" href="mailto:sriramojunikhil66@gmail.com">Email</a></div>
+</section>
+</main>
+<footer>
+  <div class="ft">
+    <div><a class="brand" href="#top"><span class="logo"><svg viewBox="0 0 16 16"><rect x="1" y="6" width="3" height="9" rx="1" fill="#09131F"/><rect x="6.5" y="1" width="3" height="14" rx="1" fill="#09131F"/><rect x="12" y="4" width="3" height="11" rx="1" fill="#09131F"/></svg></span>Equilibra</a><p>A synthetic data pipeline for severely imbalanced datasets, with honest evaluation.</p></div>
+    <div><h4>Project</h4><a href="https://github.com/Nikhil-creat/synthetic-data-pipeline">Source code</a><a href="#stack">Pipeline</a><a href="#lab">Playground</a><a href="#ops">Production</a></div>
+    <div><h4>Contact</h4><a href="https://github.com/Nikhil-creat">GitHub</a><a href="https://in.linkedin.com/in/nikhil-chary-sriramoju-95041b38a">LinkedIn</a><a href="mailto:sriramojunikhil66@gmail.com">Email</a></div>
+  </div>
+  <div class="legal"><span>&copy; 2026 Nikhil Chary Sriramoju. MIT licensed.</span><a href="#top">Back to top</a></div>
+</footer>
+
+
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var NS='http://www.w3.org/2000/svg', W=1440, H=380, PITCH=10, DOT=6, COLS=144, EXTRA=4;
+  var svg=document.getElementById('eq'), mic=document.getElementById('mic');
+
+  function lcg(seed){var s=seed>>>0;return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+  var R=lcg(11);
+
+  // row colours: pale near the glow at the baseline, cyan toward the tips
+  function mix(a,b,t){return Math.round(a+(b-a)*t)}
+  var pal=[]; for(var r=0;r<40;r++){var t=Math.min(1,r/18);pal.push('rgb('+mix(236,70,t)+','+mix(252,220,t)+','+mix(254,236,t)+')')}
+
+  // build columns: resting height, own slanted baseline
+  var cols=[];
+  for(var c=0;c<COLS;c++){
+    var edge=.35+.65*Math.sin(Math.PI*(c+.5)/COLS);
+    var h0=Math.max(2,Math.round((3+15*(.5+.5*Math.sin(c*.21)*Math.cos(c*.07+1)))*edge+R()*3));
+    var base=H-8-c*.1, dots=[];
+    for(var r2=0;r2<h0+EXTRA;r2++){
+      var d=document.createElementNS(NS,'rect');
+      d.setAttribute('x',c*PITCH+2);d.setAttribute('y',(base-(r2+1)*PITCH).toFixed(1));
+      d.setAttribute('width',DOT);d.setAttribute('height',DOT);d.setAttribute('fill',pal[r2]);
+      if(r2>=h0)d.style.visibility='hidden';
+      svg.appendChild(d);dots.push(d);
+    }
+    cols.push({h0:h0,dots:dots,shown:h0});
+  }
+  if(reduce)return;
+
+  // speech schedule: phrases 1.6-2.8s, pauses 0.2-0.5s (deterministic)
+  var PH=[],acc=0,RS=lcg(7);
+  while(acc<7200){var dur=1.6+RS()*1.2,gap=.2+RS()*.3;PH.push([acc,acc+dur]);acc+=dur+gap}
+  function hash(n){var x=Math.sin(n*12.9898)*43758.5453;return x-Math.floor(x)}
+  function phrase(t){var lo=0,hi=PH.length-1;while(lo<=hi){var m=(lo+hi)>>1;if(t<PH[m][0])hi=m-1;else if(t>PH[m][1])lo=m+1;else return PH[m]}return null}
+  function level(t){
+    if(t<0)return 0;
+    var p=phrase(t);if(!p)return 0;
+    var u=(t-p[0])/(p[1]-p[0]), env=Math.pow(Math.sin(Math.PI*u),.6);
+    var ph=t*6, n=Math.floor(ph), f=ph-n;
+    return env*Math.pow(Math.sin(Math.PI*f),1.4)*(.45+.55*hash(n));
+  }
+
+  // pure function of the page clock: a long Web Animation is the time source
+  var clock=document.documentElement.animate([{opacity:1},{opacity:1}],{duration:1e9});
+  function frame(){
+    var t=clock.currentTime/1000-1.1, mid=COLS/2;
+    for(var c=0;c<COLS;c++){
+      var col=cols[c], lv=level(t-Math.abs(c-mid)*.012);
+      var w=.5+.5*Math.sin(t*(1.1+(c%9)*.23)+c*.77);
+      var ex=Math.max(0,Math.min(EXTRA,Math.round(lv*(.25+.75*w)*EXTRA*1.25)));
+      var n=col.h0+ex;
+      if(n!==col.shown){
+        var a=Math.min(n,col.shown),b=Math.max(n,col.shown);
+        for(var i=a;i<b;i++)col.dots[i].style.visibility=n>col.shown?'visible':'hidden';
+        col.shown=n;
+      }
+    }
+    mic.style.setProperty('--lvl',level(t).toFixed(3));
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  // header: sticky bar after hero, mobile menu
+  var bar=$('#bar'),hero=$('.hero'),menu=$('#menu');
+  addEventListener('scroll',function(){bar.classList.toggle('on',scrollY>hero.offsetHeight-120)},{passive:true});
+  $('.burger').onclick=function(){menu.classList.add('open')};
+  menu.addEventListener('click',function(e){if(e.target.tagName=='A'||e.target.tagName=='BUTTON')menu.classList.remove('open')});
+
+  // playground
+  function lcg(s){return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+  var cv=$('#cv'),cx=cv.getContext('2d');
+  function run(){
+    var p=+$('#pct').value/100,R=lcg(5),N=3000;$('#pctv').textContent=(p*100)+'%';
+    function g(){var u=R()||1e-9,v=R();return Math.sqrt(-2*Math.log(u))*Math.cos(6.2832*v)}
+    function shuf(a){for(var i=a.length-1;i>0;i--){var j=R()*(i+1)|0,t=a[i];a[i]=a[j];a[j]=t}return a}
+    var nm=Math.max(30,Math.round(N*p)),D=[];
+    for(var i=0;i<N;i++)D.push(i<nm?[1.6+1.1*g(),1.2+1.1*g(),1]:[g(),g(),0]);
+    var sp={fit:[],val:[],test:[]};   // stratified split FIRST
+    [0,1].forEach(function(c){var a=shuf(D.filter(function(d){return d[2]==c})),n=a.length;
+      sp.fit=sp.fit.concat(a.slice(0,.6*n|0));sp.val=sp.val.concat(a.slice(.6*n|0,.8*n|0));sp.test=sp.test.concat(a.slice(.8*n|0))});
+    var mu=[0,1].map(function(j){return sp.fit.reduce(function(s,d){return s+d[j]},0)/sp.fit.length});   // scaler: fit rows only
+    var sd=[0,1].map(function(j){return Math.sqrt(sp.fit.reduce(function(s,d){return s+Math.pow(d[j]-mu[j],2)},0)/sp.fit.length)});
+    function sc(a){return a.map(function(d){return[(d[0]-mu[0])/sd[0],(d[1]-mu[1])/sd[1],d[2]]})}
+    var F=sc(sp.fit),V=sc(sp.val),T=sc(sp.test);
+    function d2(a,b){return Math.pow(a[0]-b[0],2)+Math.pow(a[1]-b[1],2)}
+    function near(a,pool,k){return pool.filter(function(b){return b!==a}).map(function(b){return[d2(a,b),b]}).sort(function(x,y){return x[0]-y[0]}).slice(0,k)}
+    function synth(kind){
+      var mi=F.filter(function(d){return d[2]}),ma=F.length-mi.length,seeds=mi;
+      if(kind=='borderline'){var dg=mi.filter(function(a){var k=near(a,F,10).filter(function(x){return!x[1][2]}).length;return k>=5&&k<10});if(dg.length>2)seeds=dg}
+      var nb=seeds.map(function(a){return near(a,mi,5).map(function(x){return x[1]})}),want=Math.round(.5*ma)-mi.length,out=[];
+      for(var i=0;i<want;i++){var s=R()*seeds.length|0,a=seeds[s],b=nb[s][R()*nb[s].length|0],t=R();out.push([a[0]+t*(b[0]-a[0]),a[1]+t*(b[1]-a[1]),1])}
+      return out}
+    function fit(A){var w=[0,0,0],n=A.length;for(var it=0;it<300;it++){var gr=[0,0,0];A.forEach(function(d){var e=1/(1+Math.exp(-(w[0]*d[0]+w[1]*d[1]+w[2])))-d[2];gr[0]+=e*d[0];gr[1]+=e*d[1];gr[2]+=e});w=w.map(function(x,i){return x-.5*gr[i]/n})}return w}
+    function sig(w,d){return 1/(1+Math.exp(-(w[0]*d[0]+w[1]*d[1]+w[2])))}
+    function rank(y,s){return y.map(function(v,i){return[s[i],v]}).sort(function(a,b){return b[0]-a[0]})}
+    function sum(y){return y.reduce(function(a,b){return a+b},0)}
+    function ap(y,s){var r=rank(y,s),P=sum(y),tp=0,t=0;r.forEach(function(x,i){if(x[1]){tp++;t+=tp/(i+1)}});return t/P}
+    function best(y,s){var r=rank(y,s),P=sum(y),tp=0,b=-1,th=.5;r.forEach(function(x,i){if(x[1])tp++;var f=2*tp/(i+1+P);if(f>b){b=f;th=x[0]}});return th}
+    function at(y,s,th){var tp=0,fp=0,fn=0;y.forEach(function(v,i){var q=s[i]>=th;if(q&&v)tp++;else if(q)fp++;else if(v)fn++});var pr=tp/(tp+fp||1),rc=tp/(tp+fn||1);return{pr:pr,rc:rc,f1:2*pr*rc/(pr+rc||1)}}
+    function score(A){var w=fit(A),yv=V.map(function(d){return d[2]}),yt=T.map(function(d){return d[2]}),st=T.map(function(d){return sig(w,d)}),th=best(yv,V.map(function(d){return sig(w,d)})),m=at(yt,st,th);
+      return{ap:ap(yt,st),pr:m.pr,rc:m.rc,f1:m.f1,r50:at(yt,st,.5).rc,yt:yt}}
+    var alg=$('#alg').value,frac=sp.fit.filter(function(d){return d[2]}).length/sp.fit.length;
+    var kind=alg=='auto'?(p<.02?'borderline':'smote'):alg,syn=kind=='none'?[]:synth(kind);
+    var a=score(F),b=score(F.concat(syn));
+    var names={smote:'SMOTE',borderline:'Borderline-SMOTE',none:'no resampling'};
+    $('#route').textContent=(alg=='auto'?'Agent: minority is '+(frac*100).toFixed(1)+'% of training rows, so it routes to '+names[kind]+'. ':'Manual choice: '+names[kind]+'. ')+syn.length+' synthetic rows added to the training split only.';
+    var f=function(x){return x.toFixed(2)},rows=[['PR-AUC','ap'],['Precision','pr'],['Recall','rc'],['F1','f1'],['Recall at 0.5 cut-off','r50']];
+    $('#tbl').innerHTML='<tr><th></th><th>Before</th><th>After</th></tr>'+rows.map(function(r){return'<tr><td>'+r[0]+'</td><td>'+f(a[r[1]])+'</td><td class="hi">'+f(b[r[1]])+'</td></tr>'}).join('');
+    var pos=sum(a.yt)/a.yt.length;
+    $('#acc').textContent='Test rows are never resampled. A model that always says "majority" is '+((1-pos)*100).toFixed(1)+'% accurate and finds no rare cases, so accuracy is not reported. A random model scores a PR-AUC of '+f(pos)+'.';
+    // draw training split + synthetic rows
+    var all=F.concat(syn),x0=-4,x1=5,y0=-4,y1=5,W=cv.width,H=cv.height;cx.clearRect(0,0,W,H);
+    function X(v){return(v-x0)/(x1-x0)*W}function Y(v){return H-(v-y0)/(y1-y0)*H}
+    all.forEach(function(d){if(!d[2]){cx.fillStyle='rgba(159,179,196,.35)';cx.fillRect(X(d[0])-1.5,Y(d[1])-1.5,3,3)}});
+    F.forEach(function(d){if(d[2]){cx.fillStyle='#46DCEC';cx.beginPath();cx.arc(X(d[0]),Y(d[1]),4,0,6.3);cx.fill()}});
+    syn.forEach(function(d){cx.strokeStyle='#F6EBD6';cx.lineWidth=1.5;cx.beginPath();cx.arc(X(d[0]),Y(d[1]),3,0,6.3);cx.stroke()});
+  }
+  $('#run').onclick=run;$('#alg').onchange=run;$('#pct').oninput=run;
+  $('#go').onclick=function(){$('#lab').scrollIntoView({behavior:'smooth'});run()};
+  run();
+
+  // API tester
+  var out=$('#out');
+  function api(path,opt){opt=opt||{};var h=opt.headers||{},k=$('#key').value;if(k)h['X-API-Key']=k;opt.headers=h;
+    return fetch($('#base').value.replace(/\/$/,'')+path,opt).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(r.status+' '+t)});return r})}
+  function show(x){out.textContent=typeof x=='string'?x:JSON.stringify(x,null,2)}
+  function fail(e){show('Request failed: '+e.message+'\nIs the backend running, and is this origin allowed by CORS_ORIGINS? Browsers may block http://localhost from an https page in Safari; use Chrome or Firefox.')}
+  $('#hb').onclick=function(){api('/health').then(function(r){return r.json()}).then(show).catch(fail)};
+  $('#fb').onclick=function(){
+    var J={method:'POST',headers:{'Content-Type':'application/json'}},log={},id;
+    show('Running...');
+    api('/demo-data?n=3000&minority_fraction=0.02').then(function(r){return r.blob()}).then(function(b){
+      var fd=new FormData();fd.append('file',b,'demo.csv');fd.append('kind','tabular');fd.append('target','target');
+      return api('/ingest',{method:'POST',body:fd})}).then(function(r){return r.json()}).then(function(j){id=j.dataset_id;log.ingest=j.profile;
+      return api('/resample',Object.assign({body:JSON.stringify({dataset_id:id})},J))}).then(function(r){return r.json()}).then(function(j){log.resample={strategy:j.strategy,why:j.routing_reason,before:j.counts_before,after:j.counts_after,rag:j.rag_citations};
+      return api('/train',Object.assign({body:JSON.stringify({dataset_id:id})},J))}).then(function(){
+      return api('/evaluate',Object.assign({body:JSON.stringify({dataset_id:id})},J))}).then(function(r){return r.json()}).then(function(j){log.evaluate=j;show(log)}).catch(fail)};
+})();
+</script>
+</body>
+</html>
