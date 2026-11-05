@@ -398,6 +398,20 @@ class RAGStrategyEngine:
         dim = "high-dimensional embedding cnn latent vectors" if p.n_features > 100 else "tabular"
         return f"{sev} {noise} {dim} smote compliance precision recall f1 pr-auc"
 
+    def search(self, text: str, limit: int = 3) -> List[Dict[str, Any]]:
+        """Free-text lookup used by the assistant to ground its answers."""
+        if self.client is None:
+            return []
+        try:
+            hits = self.client.query_points(
+                self.cfg.qdrant_collection, query=self.embedder.embed(text), limit=limit
+            ).points
+        except Exception as exc:
+            logger.warning("RAG search failed (%s).", exc)
+            return []
+        return [{"source": (h.payload or {}).get("source", ""), "text": (h.payload or {}).get("text", ""),
+                 "rec": (h.payload or {}).get("rec", {})} for h in hits if h.score > 0.05]
+
     def retrieve(self, profile: DatasetProfile) -> RetrievedStrategy:
         out = RetrievedStrategy(backend=self.backend)
         if self.client is None:
@@ -727,6 +741,21 @@ class SyntheticDataPipeline:
         m = self.evaluator.evaluate(d.y_val, sc, thr)
         return {"strategy": name, "pr_auc_val": m["pr_auc"], "precision_val": m["precision"],
                 "recall_val": m["recall"], "f1_val": m["f1"]}
+
+    def context(self) -> Dict[str, Any]:
+        """Compact, non-sensitive summary of this session for the assistant."""
+        s = self.state
+        if s is None:
+            return {}
+        ctx: Dict[str, Any] = {"modality": s.data.modality}
+        if s.profile:
+            ctx.update({"profile": s.profile.to_dict(), "strategy": s.strategy,
+                        "routing_reason": s.routing_reason, "k_neighbors": s.k_neighbors,
+                        "sampling_ratio": s.sampling_ratio, "classifier": s.classifier_name})
+        if self.last_metrics:
+            keep = ("precision", "recall", "f1", "pr_auc", "pr_auc_baseline", "threshold", "threshold_source")
+            ctx["test_metrics"] = {k: self.last_metrics[k] for k in keep}
+        return ctx
 
     def report(self) -> Dict[str, Any]:
         """Model card: what was done, why, and the honest numbers."""

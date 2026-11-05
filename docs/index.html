@@ -4,7 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Equilibra · Honest models from imbalanced data</title>
-<meta name="description" content="A synthetic data pipeline for severely imbalanced datasets: agentic resampling, RAG-guided hyperparameters, and leakage-free evaluation.">
+<meta name="description" content="Equilibra is an agentic synthetic-data pipeline for severely imbalanced datasets: SMOTE, ADASYN, Borderline-SMOTE and SMOTE-Tomek, ResNet image features, Qdrant RAG, a Groq and Gemini AI assistant, FastAPI and Docker, with honest PR-AUC evaluation.">
+<meta name="keywords" content="imbalanced data, SMOTE, ADASYN, Borderline-SMOTE, SMOTE-Tomek, synthetic data, imbalanced-learn, PR-AUC, precision recall, data leakage prevention, agentic AI, RAG, Qdrant, ResNet feature extraction, FastAPI, Docker, MLOps, Groq, Gemini, AI assistant, Nikhil Chary Sriramoju">
+<meta name="author" content="Nikhil Chary Sriramoju">
+<meta name="theme-color" content="#09131F">
+<link rel="canonical" href="https://nikhil-creat.github.io/synthetic-data-pipeline/">
+<meta property="og:type" content="website"><meta property="og:title" content="Equilibra: honest models from imbalanced data"><meta property="og:description" content="Equilibra is an agentic synthetic-data pipeline for severely imbalanced datasets: SMOTE, ADASYN, Borderline-SMOTE and SMOTE-Tomek, ResNet image features, Qdrant RAG, a Groq and Gemini AI assistant, FastAPI and Docker, with honest PR-AUC evaluation."><meta property="og:url" content="https://nikhil-creat.github.io/synthetic-data-pipeline/">
+<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Equilibra: honest models from imbalanced data"><meta name="twitter:description" content="Equilibra is an agentic synthetic-data pipeline for severely imbalanced datasets: SMOTE, ADASYN, Borderline-SMOTE and SMOTE-Tomek, ResNet image features, Qdrant RAG, a Groq and Gemini AI assistant, FastAPI and Docker, with honest PR-AUC evaluation.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Equilibra","description":"Equilibra is an agentic synthetic-data pipeline for severely imbalanced datasets: SMOTE, ADASYN, Borderline-SMOTE and SMOTE-Tomek, ResNet image features, Qdrant RAG, a Groq and Gemini AI assistant, FastAPI and Docker, with honest PR-AUC evaluation.","codeRepository":"https://github.com/Nikhil-creat/synthetic-data-pipeline","programmingLanguage":"Python","license":"https://opensource.org/licenses/MIT","author":{"@type":"Person","name":"Nikhil Chary Sriramoju","url":"https://github.com/Nikhil-creat"}}</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2724%22 fill=%22%2346DCEC%22/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -114,6 +121,32 @@ footer a{display:block;color:#cfe3ee;padding:3px 0;text-decoration:none}footer a
 footer .brand{color:#fff;margin-bottom:12px;display:flex}footer p{max-width:320px;line-height:1.55}
 footer .legal{margin-top:34px;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
+
+.menu{z-index:70}
+.pill{padding:6px 12px;border-radius:999px;font-size:13px;background:rgba(255,255,255,.08);color:var(--mist)}.pill.on{color:var(--cyan);background:rgba(70,220,236,.12)}
+.info.dark{background:radial-gradient(900px 380px at 85% 0,rgba(70,220,236,.14),transparent 60%),var(--navy)}
+.svgwrap{margin-top:34px;overflow-x:auto;border-radius:18px;background:var(--navy);padding:18px}.svgwrap svg{display:block;min-width:760px;width:100%;height:auto}.svgwrap text{font-family:Inter,sans-serif}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}.chips span{padding:7px 14px;border:1px solid #cfdde5;border-radius:999px;font-size:13.5px;color:#27465a}
+#ai-fab{position:fixed;z-index:50;right:18px;bottom:18px;height:48px;padding:0 20px;border-radius:999px;border:1px solid rgba(70,220,236,.5);background:var(--navy);color:#fff;font:600 15px Inter,sans-serif;cursor:pointer;box-shadow:0 0 0 0 rgba(70,220,236,.5),0 10px 30px -8px rgba(9,19,31,.7);animation:pulse 3s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(70,220,236,0),0 10px 30px -8px rgba(9,19,31,.7)}}
+.aipanel{position:fixed;z-index:60;right:18px;bottom:78px;width:min(380px,calc(100vw - 24px));height:min(540px,calc(100svh - 110px));display:flex;flex-direction:column;background:#0b1a28;color:#dbe8f0;border:1px solid rgba(70,220,236,.25);border-radius:18px;box-shadow:0 30px 70px -20px rgba(0,0,0,.7);overflow:hidden}
+.aipanel[hidden],#ai-set[hidden]{display:none}
+.aipanel>header{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.aipanel>header b{font-size:15px}.aipanel>header span{flex:1;font-size:12px;color:var(--cyan);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aipanel>header button{background:none;border:0;color:#9FB3C4;font-size:18px;cursor:pointer;width:30px;height:30px}
+#ai-set{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08);font-size:12.5px;line-height:1.5;color:#9FB3C4}
+#ai-set input{width:100%;height:38px;margin:8px 0;border-radius:9px;border:1px solid #2a4254;background:#0d1d2c;color:#fff;padding:0 10px}
+#ai-set button{height:34px;padding:0 14px;border-radius:9px;border:0;background:var(--cyan);color:#06222a;font-weight:600;cursor:pointer;margin-right:8px}
+#ai-set button.alt{background:#1b3446;color:#cfe3ee}
+#ai-log{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.5}
+.msg.bot{background:#12293b;align-self:flex-start;border-bottom-left-radius:4px}.msg.user{background:var(--cyan);color:#06222a;align-self:flex-end;border-bottom-right-radius:4px}
+.msg code{background:rgba(255,255,255,.12);padding:0 4px;border-radius:4px}
+.sug{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 8px}.sug button{border:1px solid #27465a;background:none;color:#bcd2df;border-radius:999px;padding:5px 10px;font-size:12px;cursor:pointer}
+#ai-form{display:flex;gap:8px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.08)}
+#ai-form input{flex:1;min-width:0;height:40px;border-radius:999px;border:1px solid #2a4254;background:#0d1d2c;color:#fff;padding:0 14px;font:inherit;font-size:14px}
+#ai-form button{height:40px;padding:0 16px;border-radius:999px;border:0;background:var(--cyan);color:#06222a;font-weight:600;cursor:pointer}
+
 /* ---------- phone ---------- */
 @media (max-width:760px){
   .links{display:none}.bar .brand{font-size:17px}
@@ -196,6 +229,12 @@ footer .legal{margin-top:34px;padding-top:18px;border-top:1px solid rgba(255,255
   </div>
 </section>
 
+<section class="info" id="arch">
+  <h2>Architecture at a glance</h2>
+  <p>One FastAPI service orchestrates an agent graph. Qdrant supplies guidance, an LLM router powers the assistant, and every run ends in a model card.</p>
+  <div class="svgwrap"><svg viewBox="0 0 900 230" role="img" aria-label="Architecture: client to FastAPI to agent graph to train to evaluate, with Qdrant, an LLM assistant and a model card"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#46DCEC"/></marker></defs><line x1="170" y1="59" x2="203" y2="59" stroke="#46DCEC" stroke-width="1.5" marker-end="url(#ar)"/><line x1="355" y1="59" x2="388" y2="59" stroke="#46DCEC" stroke-width="1.5" marker-end="url(#ar)"/><line x1="540" y1="59" x2="573" y2="59" stroke="#46DCEC" stroke-width="1.5" marker-end="url(#ar)"/><line x1="725" y1="59" x2="743" y2="59" stroke="#46DCEC" stroke-width="1.5" marker-end="url(#ar)"/><line x1="280" y1="90" x2="280" y2="148" stroke="#46DCEC" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ar)"/><line x1="465" y1="90" x2="465" y2="148" stroke="#46DCEC" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ar)"/><line x1="812" y1="90" x2="812" y2="148" stroke="#46DCEC" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ar)"/><rect x="20" y="30" width="150" height="58" rx="12" fill="#0d1d2c" stroke="#2a4254"/><text x="95.0" y="55" text-anchor="middle" fill="#fff" font-size="15" font-weight="600">Client</text><text x="95.0" y="74" text-anchor="middle" fill="#9FB3C4" font-size="12">CSV or image ZIP</text><rect x="205" y="30" width="150" height="58" rx="12" fill="#0d1d2c" stroke="#2a4254"/><text x="280.0" y="55" text-anchor="middle" fill="#fff" font-size="15" font-weight="600">FastAPI</text><text x="280.0" y="74" text-anchor="middle" fill="#9FB3C4" font-size="12">auth, CORS, metrics</text><rect x="390" y="30" width="150" height="58" rx="12" fill="#0d1d2c" stroke="#2a4254"/><text x="465.0" y="55" text-anchor="middle" fill="#fff" font-size="15" font-weight="600">Agent graph</text><text x="465.0" y="74" text-anchor="middle" fill="#9FB3C4" font-size="12">profile, route, heal</text><rect x="575" y="30" width="150" height="58" rx="12" fill="#0d1d2c" stroke="#2a4254"/><text x="650.0" y="55" text-anchor="middle" fill="#fff" font-size="15" font-weight="600">Train</text><text x="650.0" y="74" text-anchor="middle" fill="#9FB3C4" font-size="12">logreg or rf, retries</text><rect x="745" y="30" width="135" height="58" rx="12" fill="#0d1d2c" stroke="#2a4254"/><text x="812.5" y="55" text-anchor="middle" fill="#fff" font-size="15" font-weight="600">Evaluate</text><text x="812.5" y="74" text-anchor="middle" fill="#9FB3C4" font-size="12">PR-AUC, tuned threshold</text><rect x="205" y="150" width="150" height="58" rx="12" fill="#0d1d2c" stroke="#2a4254"/><text x="280.0" y="175" text-anchor="middle" fill="#fff" font-size="15" font-weight="600">Groq / Gemini</text><text x="280.0" y="194" text-anchor="middle" fill="#9FB3C4" font-size="12">auto-detected model</text><rect x="390" y="150" width="150" height="58" rx="12" fill="#0d1d2c" stroke="#2a4254"/><text x="465.0" y="175" text-anchor="middle" fill="#fff" font-size="15" font-weight="600">Qdrant RAG</text><text x="465.0" y="194" text-anchor="middle" fill="#9FB3C4" font-size="12">papers, policies</text><rect x="745" y="150" width="135" height="58" rx="12" fill="#0d1d2c" stroke="#2a4254"/><text x="812.5" y="175" text-anchor="middle" fill="#fff" font-size="15" font-weight="600">Model card</text><text x="812.5" y="194" text-anchor="middle" fill="#9FB3C4" font-size="12">/report, /compare</text></svg></div>
+  <div class="chips"><span>Python</span><span>PyTorch</span><span>scikit-learn</span><span>imbalanced-learn</span><span>FastAPI</span><span>Qdrant</span><span>Docker</span><span>Groq</span><span>Gemini</span><span>GitHub Actions</span></div>
+</section>
 <section class="info dark" id="lab">
   <h2>Try it in your browser</h2>
   <p>A small 2-D stand-in for the real pipeline, with the same rules: split first, resample the training rows only, score the untouched test rows.</p>
@@ -206,7 +245,7 @@ footer .legal{margin-top:34px;padding-top:18px;border-top:1px solid rgba(255,255
       <div class="ctl">
         <label>Minority share <input id="pct" type="range" min="0.5" max="10" step="0.5" value="1"> <b id="pctv">1%</b></label>
         <label>Resampler <select id="alg"><option value="auto">Agent picks</option><option value="smote">SMOTE</option><option value="borderline">Borderline-SMOTE</option><option value="none">None</option></select></label>
-        <button class="btn cream" id="run" type="button">Run</button>
+        <button class="btn cream" id="run" type="button">Run</button><button class="btn glass" id="ex" type="button">Explain with AI</button>
       </div>
       <p class="cap" id="acc"></p>
     </div>
@@ -216,7 +255,7 @@ footer .legal{margin-top:34px;padding-top:18px;border-top:1px solid rgba(255,255
   <div class="ctl">
     <input id="base" type="text" value="http://localhost:8000" aria-label="API base URL" size="24">
     <input id="key" type="password" placeholder="X-API-Key (optional)" aria-label="API key">
-    <button class="btn glass" id="hb" type="button">Check health</button>
+    <span class="pill" id="st">API: checking</span><button class="btn glass" id="hb" type="button">Check health</button>
     <button class="btn cream" id="fb" type="button">Run full demo</button>
   </div>
   <pre id="out">Output appears here.</pre>
@@ -255,6 +294,19 @@ footer .legal{margin-top:34px;padding-top:18px;border-top:1px solid rgba(255,255
 </footer>
 
 
+<button id="ai-fab" type="button" aria-expanded="false" aria-controls="ai">&#10022; Ask AI</button>
+<section class="aipanel" id="ai" role="dialog" aria-label="Equilibra assistant" hidden>
+  <header><b>Assistant</b><span id="ai-chip">Offline mode</span><button id="ai-cfg" type="button" aria-label="Key settings">&#9881;</button><button id="ai-x" type="button" aria-label="Close">&times;</button></header>
+  <div id="ai-set" hidden>
+    <label for="ai-key">Paste a free Groq (gsk_&hellip;) or Gemini (AIza&hellip;) key. The provider and best model are detected automatically.</label>
+    <input id="ai-key" type="password" autocomplete="off" placeholder="API key">
+    <button id="ai-save" type="button">Save</button><button class="alt" id="ai-clear" type="button">Remove keys</button>
+    <p>Stored only in this browser and sent only to Groq or Google.</p>
+  </div>
+  <div id="ai-log" aria-live="polite"></div>
+  <div class="sug"><button type="button">What does this project do?</button><button type="button">Why not accuracy?</button><button type="button">Who built this?</button></div>
+  <form id="ai-form"><input id="ai-in" maxlength="500" placeholder="Ask about the pipeline or Nikhil" aria-label="Message"><button type="submit">Send</button></form>
+</section>
 <script>
 (function(){
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -398,6 +450,64 @@ footer .legal{margin-top:34px;padding-top:18px;border-top:1px solid rgba(255,255
       return api('/resample',Object.assign({body:JSON.stringify({dataset_id:id})},J))}).then(function(r){return r.json()}).then(function(j){log.resample={strategy:j.strategy,why:j.routing_reason,before:j.counts_before,after:j.counts_after,rag:j.rag_citations};
       return api('/train',Object.assign({body:JSON.stringify({dataset_id:id})},J))}).then(function(){
       return api('/evaluate',Object.assign({body:JSON.stringify({dataset_id:id})},J))}).then(function(r){return r.json()}).then(function(j){log.evaluate=j;show(log)}).catch(fail)};
+})();
+</script>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var K={};try{K=JSON.parse(localStorage.getItem('eq_keys')||'{}')}catch(e){}
+  var hist=[],cache={},busy=false,greeted=false;
+  var SYS="You are the assistant on Nikhil Chary Sriramoju's portfolio site for Equilibra, an agentic synthetic-data pipeline for severely imbalanced datasets. Facts: stratified split first; scaler fitted on train only; SMOTE, ADASYN, Borderline-SMOTE and SMOTE-Tomek touch training rows only; frozen ResNet18 features for images; Qdrant RAG suggests k_neighbors and target ratios; self-healing retries; PR-AUC, precision, recall and F1 are reported and accuracy never is; FastAPI and Docker. Nikhil is a final-year B.Tech CSE student building agentic AI, RAG and MLOps projects, with Forage job simulations (Deloitte, PwC, Datacom, British Airways), NASSCOM and Skill India courses, and Reliance Foundation programmes. GitHub: github.com/Nikhil-creat. Answer in under 120 words. If unsure, say so. Never invent numbers and never ask for API keys.";
+  var FAQ=[[/accura/i,"Accuracy is misleading on rare-event data: a model that always predicts the majority class can be 99% accurate and find nothing. Equilibra reports PR-AUC, precision, recall and F1 instead."],[/who|nikhil|built|author|creator/i,"Equilibra was built by Nikhil Chary Sriramoju, a final-year B.Tech CSE student working on agentic AI, RAG and MLOps projects. See the About section, or GitHub: github.com/Nikhil-creat."],[/leak|split|scal/i,"The data is split with stratification first. The scaler is fitted on training rows only, and resampling never touches validation or test rows."],[/smote|resampl|rout|borderline|adasyn|tomek/i,"The agent picks the resampler: Borderline-SMOTE when the minority is under 2%, SMOTE-Tomek for noisy overlap, ADASYN for moderate low-noise cases, and SMOTE otherwise. Failures retry with safer settings."],[/rag|qdrant|vector/i,"Qdrant stores papers and policy notes. The agent retrieves k_neighbors, target ratios and compliance limits from it, and responses cite the sources."],[/docker|run|deploy|start|install/i,"Copy .env.example to .env, then run docker compose up --build. The API is on port 8000 and Qdrant on 6333."],[/key|groq|gemini|model|llm/i,"Open the gear icon and paste a free Groq or Gemini key. The provider is detected from the key and the best available model is chosen automatically."]];
+  var FAQ0="I can answer questions about the pipeline, its API, and Nikhil's background. Add a free Groq or Gemini key (gear icon) for open-ended answers.";
+  var DEF={groq:['llama-3.3-70b-versatile','llama-3.1-8b-instant'],gemini:['gemini-flash-latest','gemini-2.0-flash']};
+  function detect(k){return /^gsk_/.test(k)?'groq':/^AIza/.test(k)?'gemini':null}
+  function rankGroq(ids){return ids.filter(function(m){return!/whisper|tts|guard|embed|playai|orpheus|safeguard|compound|vision-preview/i.test(m)}).map(function(m){var l=m.toLowerCase(),s=l.match(/(\d+)b/),v=l.match(/llama-?(\d+(?:\.\d+)?)/);return[(s?+s[1]:10)+(/versatile/.test(l)?30:0)+(/llama/.test(l)?25:0)+(v?+v[1]*10:0),m]}).sort(function(a,b){return b[0]-a[0]}).map(function(x){return x[1]})}
+  function rankGem(ms){var W={'flash':3,'flash-lite':2,'pro':1};return ms.filter(function(m){return(m.supportedGenerationMethods||[]).indexOf('generateContent')>=0}).map(function(m){var n=m.name.split('/').pop();if(/tts|image|embed|aqa|vision|live|audio|robotics|computer|imagen|veo|gemma|learnlm|thinking-exp/i.test(n))return null;var a=n.match(/^gemini-(\d+(?:\.\d+)?)-(flash-lite|flash|pro)/),b=n.match(/^gemini-(flash-lite|flash|pro)-latest/),v,f;if(a){v=+a[1];f=a[2]}else if(b){v=2.5;f=b[1]}else return null;return[W[f]*100+v*10-(/preview|exp/.test(n)?5:0),n]}).filter(Boolean).sort(function(a,b){return b[0]-a[0]}).map(function(x){return x[1]})}
+  async function models(p){
+    if(cache[p])return cache[p];var l=[];
+    try{if(p=='groq'){var r=await fetch('https://api.groq.com/openai/v1/models',{headers:{Authorization:'Bearer '+K.groq}});if(r.ok)l=rankGroq((await r.json()).data.filter(function(m){return m.active!==false}).map(function(m){return m.id}))}
+      else{var g=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',{headers:{'x-goog-api-key':K.gemini}});if(g.ok)l=rankGem((await g.json()).models)}}catch(e){}
+    return cache[p]=l.length?l:DEF[p]}
+  async function call(p,m,msgs){
+    var r,j;
+    if(p=='groq'){r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+K.groq},body:JSON.stringify({model:m,messages:[{role:'system',content:SYS}].concat(msgs),max_tokens:600,temperature:.3})});if(!r.ok)throw r.status;j=await r.json();return(j.choices[0].message.content||'').trim()}
+    r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':K.gemini},body:JSON.stringify({systemInstruction:{parts:[{text:SYS}]},contents:msgs.map(function(x){return{role:x.role=='assistant'?'model':'user',parts:[{text:x.content}]}}),generationConfig:{temperature:.3,maxOutputTokens:600}})});
+    if(!r.ok)throw r.status;j=await r.json();return j.candidates[0].content.parts.map(function(x){return x.text||''}).join('').trim()}
+  async function ask(msgs){
+    for(var p of['groq','gemini']){if(!K[p])continue;var ms=await models(p);
+      for(var m of ms.slice(0,3)){try{var t=await call(p,m,msgs);if(t)return{t:t,tag:(p=='groq'?'Groq':'Gemini')+' \u00b7 '+m}}catch(e){}}}
+    try{var c=new AbortController();setTimeout(function(){c.abort()},30000);var h={'Content-Type':'application/json'},k=$('#key').value;if(k)h['X-API-Key']=k;
+      var r=await fetch($('#base').value.replace(/\/$/,'')+'/assistant/chat',{method:'POST',headers:h,signal:c.signal,body:JSON.stringify({message:msgs[msgs.length-1].content,history:msgs.slice(0,-1).slice(-10)})});
+      if(r.ok){var j=await r.json();return{t:j.reply,tag:'Backend \u00b7 '+(j.model?j.provider+' \u00b7 '+j.model:j.provider)}}}catch(e){}
+    var q=msgs[msgs.length-1].content,f=FAQ.find(function(x){return x[0].test(q)});return{t:f?f[1]:FAQ0,tag:'Offline mode'}}
+
+  var panel=$('#ai'),fab=$('#ai-fab'),log=$('#ai-log'),chip=$('#ai-chip');
+  function fmt(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\n/g,'<br>')}
+  function add(role,t){var d=document.createElement('div');d.className='msg '+role;d.innerHTML=fmt(t);log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
+  function open(){panel.hidden=false;fab.setAttribute('aria-expanded','true');if(!greeted){greeted=true;add('bot',"Hi, I'm the Equilibra assistant. Ask about the pipeline, its API, or Nikhil's background.")}$('#ai-in').focus()}
+  function close(){panel.hidden=true;fab.setAttribute('aria-expanded','false')}
+  async function send(q){q=(q||'').trim();if(!q||busy)return;busy=true;open();add('user',q);hist.push({role:'user',content:q});var w=add('bot','Thinking\u2026');
+    var r=await ask(hist.slice(-10));w.innerHTML=fmt(r.t);hist.push({role:'assistant',content:r.t});chip.textContent=r.tag;log.scrollTop=log.scrollHeight;busy=false}
+  function status(){var ps=['groq','gemini'].filter(function(p){return K[p]});chip.textContent=ps.length?ps.map(function(p){return p=='groq'?'Groq':'Gemini'}).join(' + ')+' key saved':'Offline mode'}
+  fab.onclick=function(){panel.hidden?open():close()};$('#ai-x').onclick=close;
+  $('#ai-cfg').onclick=function(){var s=$('#ai-set');s.hidden=!s.hidden};
+  $('#ai-form').onsubmit=function(e){e.preventDefault();var i=$('#ai-in'),v=i.value;i.value='';send(v)};
+  document.querySelectorAll('.sug button').forEach(function(b){b.onclick=function(){send(b.textContent)}});
+  $('#ai-save').onclick=async function(){var k=$('#ai-key').value.trim(),p=detect(k);
+    if(!p){chip.textContent='Key not recognised (expected gsk_ or AIza)';return}
+    K[p]=k;delete cache[p];try{localStorage.setItem('eq_keys',JSON.stringify(K))}catch(e){}
+    $('#ai-key').value='';$('#ai-set').hidden=true;chip.textContent='Detecting model\u2026';var ms=await models(p);chip.textContent=(p=='groq'?'Groq':'Gemini')+' \u00b7 '+ms[0]};
+  $('#ai-clear').onclick=function(){K={};cache={};try{localStorage.removeItem('eq_keys')}catch(e){}status()};
+  $('#ex').onclick=function(){send('Explain these playground results in plain English and suggest what to try next. '+$('#route').textContent+' '+$('#tbl').innerText.replace(/\s+/g,' ')+' '+$('#acc').textContent)};
+  status();if(K.groq||K.gemini)['groq','gemini'].forEach(function(p){if(K[p])models(p).then(function(m){chip.textContent=(p=='groq'?'Groq':'Gemini')+' \u00b7 '+m[0]})});
+
+  // API status pill
+  function ping(){var c=new AbortController();setTimeout(function(){c.abort()},3000);
+    fetch($('#base').value.replace(/\/$/,'')+'/health',{signal:c.signal}).then(function(r){return r.json()}).then(function(j){var s=$('#st');s.textContent='API online \u00b7 RAG '+j.rag_backend;s.className='pill on'})
+    .catch(function(){var s=$('#st');s.textContent='API offline';s.className='pill'})}
+  $('#base').onchange=ping;ping();setInterval(ping,20000);
 })();
 </script>
 </body>
