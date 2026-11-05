@@ -1,0 +1,12 @@
+torch==2.4.1
+torchvision==0.19.1
+scikit-learn==1.5.2
+imbalanced-learn==0.12.4
+numpy==1.26.4
+pandas==2.2.3
+pillow==10.4.0
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.12
+qdrant-client==1.12.1
+pydantic==2.9.2
