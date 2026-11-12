@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---------- Stage 1: build the virtualenv (CPU-only torch keeps the image small) ----------
-FROM python:3.11-slim AS builder
+FROM python:3.15-slim AS builder
 
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
@@ -21,7 +21,7 @@ RUN mkdir -p /opt/torch && \
      || echo "WARN: could not pre-download ResNet18 weights")
 
 # ---------- Stage 2: minimal runtime ----------
-FROM python:3.11-slim AS runtime
+FROM python:3.15-slim AS runtime
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
